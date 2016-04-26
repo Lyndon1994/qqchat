@@ -573,7 +573,8 @@ public class ChatFrame extends JFrame {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                System.out.println("Socket closed");
             } finally {
                 try {
                     if (reader != null) {

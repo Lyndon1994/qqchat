@@ -1,14 +1,11 @@
 package server;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
@@ -20,13 +17,15 @@ class Chat extends Thread {
     private int count;
     private int port;
     private int id;
+    private JTextArea textArea1;
 
-    public Chat(int count, Socket socket, Map<Integer, Socket> socketMap, Map<Integer, Integer> userMap, int port) {
+    public Chat(int count, Socket socket, Map<Integer, Socket> socketMap, Map<Integer, Integer> userMap, int port,JTextArea textArea1) {
         this.count = count;
         this.socket = socket;
         this.socketMap = socketMap;
         this.port = port;
         this.userMap = userMap;
+        this.textArea1=textArea1;
     }
 
 
@@ -47,6 +46,7 @@ class Chat extends Thread {
             while (true) {
                 message = reader.readLine();
                 System.out.println("接收：" + message);
+                textArea1.append("接收：" + message+"\n");
                 if (message != null) {
                     nullNum=0;
                     // 接收到客户端的bye信息，客户端即将退出，并将bye写入到该客户端
@@ -107,6 +107,7 @@ class Chat extends Thread {
                     }
 
                     System.out.println("发送：" + message);
+                    textArea1.append("发送：" + message+"\n");
                     if (isRoom) {
                         // 向所有的客户端发送接收到信息，实现群聊
                         for (Map.Entry<Integer, Socket> socket : socketMap.entrySet()) {
@@ -142,12 +143,18 @@ class Chat extends Thread {
 }
 
 public class ChatServer {
-
+    private JTextArea textArea1;
+    public ChatServer() {
+    }
+    public ChatServer(JTextArea textArea1) {
+        this.textArea1=textArea1;
+    }
     /**
      * Description
      *
      * @param
      */
+
     public void startWork() {
         ServerSocket serverSocket = null;
         try {
@@ -160,9 +167,8 @@ public class ChatServer {
                 socket = serverSocket.accept();
                 count++;
                 System.out.println(count + " clinet connected to the server!");
-//                System.out.println(socket.toString());
-//                System.out.println(socket.getLocalAddress());
-//                System.out.println(socket.getInetAddress());
+                textArea1.append(count + " clinet connected to the server!\n");
+
                 // 将每一个连接到该服务器的客户端，加到List中
                 socketMap.put(socket.getPort(), socket);
                 for(Map.Entry<Integer,Socket> ss: socketMap.entrySet()){
@@ -172,7 +178,7 @@ public class ChatServer {
                 }
                 System.out.println("socketMap:" + socketMap);
                 // 每一个连接到服务器的客户端，服务器开启一个新的线程来处理
-                new Chat(count, socket, socketMap, userMap, socket.getPort()).start();
+                new Chat(count, socket, socketMap, userMap, socket.getPort(),textArea1).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -191,9 +197,9 @@ public class ChatServer {
      * @param args
      * @throws IOException
      */
-    public static void main(String[] args){
-        ChatServer chatServer = new ChatServer();
-        chatServer.startWork();
-    }
+//    public static void main(String[] args){
+//        ChatServer chatServer = new ChatServer();
+//        chatServer.startWork();
+//    }
 
 }
